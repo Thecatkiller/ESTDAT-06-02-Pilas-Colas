@@ -151,6 +151,9 @@
     <ClInclude Include="funciones.h" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="frmColas.resx">
+      <DependentUpon>frmColas.h</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmPrincipal.resx">
       <DependentUpon>frmPrincipal.h</DependentUpon>
     </EmbeddedResource>
