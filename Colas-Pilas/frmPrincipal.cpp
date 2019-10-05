@@ -1,3 +1,4 @@
+#include <string.h>
 #include "estructuras.h"
 #include "funciones.h"
 

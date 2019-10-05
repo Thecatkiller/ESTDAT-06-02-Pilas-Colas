@@ -8,7 +8,10 @@ namespace ColasPilas {
 	using namespace System::Windows::Forms;
 	using namespace System::Data;
 	using namespace System::Drawing;
-
+	using namespace System::Runtime::InteropServices;
+	Trabajador Cola[50];
+	int tope = 0;
+	int limite = 5;
 	/// <summary>
 	/// Resumen de frmColas
 	/// </summary>
@@ -47,7 +50,8 @@ namespace ColasPilas {
 	private: System::Windows::Forms::Label^  label4;
 	private: System::Windows::Forms::DateTimePicker^  dtFechaNacimiento;
 	private: System::Windows::Forms::Label^  label5;
-	private: System::Windows::Forms::DataGridView^  dataGridView1;
+	private: System::Windows::Forms::DataGridView^  dgvLista;
+
 
 
 
@@ -89,17 +93,17 @@ namespace ColasPilas {
 			this->label4 = (gcnew System::Windows::Forms::Label());
 			this->dtFechaNacimiento = (gcnew System::Windows::Forms::DateTimePicker());
 			this->label5 = (gcnew System::Windows::Forms::Label());
-			this->dataGridView1 = (gcnew System::Windows::Forms::DataGridView());
-			this->Eliminar = (gcnew System::Windows::Forms::Button());
-			this->btnDesencolar = (gcnew System::Windows::Forms::Button());
-			this->btnEncolar = (gcnew System::Windows::Forms::Button());
+			this->dgvLista = (gcnew System::Windows::Forms::DataGridView());
 			this->colDNI = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
 			this->colNombre = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
 			this->colGenero = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
 			this->colSueldo = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
 			this->colFechaNacimiento = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
 			this->colEdad = (gcnew System::Windows::Forms::DataGridViewTextBoxColumn());
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView1))->BeginInit();
+			this->Eliminar = (gcnew System::Windows::Forms::Button());
+			this->btnDesencolar = (gcnew System::Windows::Forms::Button());
+			this->btnEncolar = (gcnew System::Windows::Forms::Button());
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dgvLista))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// label1
@@ -186,50 +190,21 @@ namespace ColasPilas {
 			this->label5->TabIndex = 9;
 			this->label5->Text = L"Fecha Nacimiento;";
 			// 
-			// dataGridView1
+			// dgvLista
 			// 
-			this->dataGridView1->AllowUserToAddRows = false;
-			this->dataGridView1->AllowUserToDeleteRows = false;
-			this->dataGridView1->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
-			this->dataGridView1->Columns->AddRange(gcnew cli::array< System::Windows::Forms::DataGridViewColumn^  >(6) {
-				this->colDNI,
-					this->colNombre, this->colGenero, this->colSueldo, this->colFechaNacimiento, this->colEdad
+			this->dgvLista->AllowUserToAddRows = false;
+			this->dgvLista->AllowUserToDeleteRows = false;
+			this->dgvLista->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
+			this->dgvLista->Columns->AddRange(gcnew cli::array< System::Windows::Forms::DataGridViewColumn^  >(6) {
+				this->colDNI, this->colNombre,
+					this->colGenero, this->colSueldo, this->colFechaNacimiento, this->colEdad
 			});
-			this->dataGridView1->Location = System::Drawing::Point(15, 171);
-			this->dataGridView1->Name = L"dataGridView1";
-			this->dataGridView1->ReadOnly = true;
-			this->dataGridView1->Size = System::Drawing::Size(633, 246);
-			this->dataGridView1->TabIndex = 10;
-			// 
-			// Eliminar
-			// 
-			this->Eliminar->Location = System::Drawing::Point(557, 104);
-			this->Eliminar->Name = L"Eliminar";
-			this->Eliminar->Size = System::Drawing::Size(91, 33);
-			this->Eliminar->TabIndex = 13;
-			this->Eliminar->Text = L"Eliminar";
-			this->Eliminar->UseVisualStyleBackColor = true;
-			this->Eliminar->Click += gcnew System::EventHandler(this, &frmColas::Eliminar_Click);
-			// 
-			// btnDesencolar
-			// 
-			this->btnDesencolar->Location = System::Drawing::Point(557, 63);
-			this->btnDesencolar->Name = L"btnDesencolar";
-			this->btnDesencolar->Size = System::Drawing::Size(91, 33);
-			this->btnDesencolar->TabIndex = 14;
-			this->btnDesencolar->Text = L"Desencolar";
-			this->btnDesencolar->UseVisualStyleBackColor = true;
-			this->btnDesencolar->Click += gcnew System::EventHandler(this, &frmColas::btnDesencolar_Click);
-			// 
-			// btnEncolar
-			// 
-			this->btnEncolar->Location = System::Drawing::Point(557, 22);
-			this->btnEncolar->Name = L"btnEncolar";
-			this->btnEncolar->Size = System::Drawing::Size(91, 33);
-			this->btnEncolar->TabIndex = 15;
-			this->btnEncolar->Text = L"Encolar";
-			this->btnEncolar->UseVisualStyleBackColor = true;
-			this->btnEncolar->Click += gcnew System::EventHandler(this, &frmColas::btnEncolar_Click);
+			this->dgvLista->Location = System::Drawing::Point(15, 171);
+			this->dgvLista->Name = L"dgvLista";
+			this->dgvLista->ReadOnly = true;
+			this->dgvLista->Size = System::Drawing::Size(633, 246);
+			this->dgvLista->TabIndex = 10;
+			this->dgvLista->CellClick += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &frmColas::dgvLista_CellClick);
 			// 
 			// colDNI
 			// 
@@ -267,6 +242,36 @@ namespace ColasPilas {
 			this->colEdad->Name = L"colEdad";
 			this->colEdad->ReadOnly = true;
 			// 
+			// Eliminar
+			// 
+			this->Eliminar->Location = System::Drawing::Point(557, 104);
+			this->Eliminar->Name = L"Eliminar";
+			this->Eliminar->Size = System::Drawing::Size(91, 33);
+			this->Eliminar->TabIndex = 13;
+			this->Eliminar->Text = L"Eliminar";
+			this->Eliminar->UseVisualStyleBackColor = true;
+			this->Eliminar->Click += gcnew System::EventHandler(this, &frmColas::Eliminar_Click);
+			// 
+			// btnDesencolar
+			// 
+			this->btnDesencolar->Location = System::Drawing::Point(557, 63);
+			this->btnDesencolar->Name = L"btnDesencolar";
+			this->btnDesencolar->Size = System::Drawing::Size(91, 33);
+			this->btnDesencolar->TabIndex = 14;
+			this->btnDesencolar->Text = L"Desencolar";
+			this->btnDesencolar->UseVisualStyleBackColor = true;
+			this->btnDesencolar->Click += gcnew System::EventHandler(this, &frmColas::btnDesencolar_Click);
+			// 
+			// btnEncolar
+			// 
+			this->btnEncolar->Location = System::Drawing::Point(557, 22);
+			this->btnEncolar->Name = L"btnEncolar";
+			this->btnEncolar->Size = System::Drawing::Size(91, 33);
+			this->btnEncolar->TabIndex = 15;
+			this->btnEncolar->Text = L"Encolar";
+			this->btnEncolar->UseVisualStyleBackColor = true;
+			this->btnEncolar->Click += gcnew System::EventHandler(this, &frmColas::btnEncolar_Click);
+			// 
 			// frmColas
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
@@ -275,7 +280,7 @@ namespace ColasPilas {
 			this->Controls->Add(this->btnEncolar);
 			this->Controls->Add(this->btnDesencolar);
 			this->Controls->Add(this->Eliminar);
-			this->Controls->Add(this->dataGridView1);
+			this->Controls->Add(this->dgvLista);
 			this->Controls->Add(this->label5);
 			this->Controls->Add(this->dtFechaNacimiento);
 			this->Controls->Add(this->label4);
@@ -288,17 +293,75 @@ namespace ColasPilas {
 			this->Controls->Add(this->label1);
 			this->Name = L"frmColas";
 			this->Text = L"frmColas";
-			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dataGridView1))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dgvLista))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
 		}
+
+
+	private:char *StringToChar(System::Windows::Forms::TextBox^ textBox) {
+		String^ val = textBox->Text;
+		IntPtr ptrToNativeString = Marshal::StringToHGlobalAnsi(val);
+		char* r = static_cast<char*>(ptrToNativeString.ToPointer());
+		return r;
+	}
 #pragma endregion
+	private: void imprimir() {
+		int ta = 0;
+		Trabajador Ca[50];
+		dgvLista->Rows->Clear();
+		while (!estaVacia(tope))
+		{
+			Trabajador ex = desenColar(tope, Cola);
+			dgvLista->Rows->Add(
+				gcnew String(ex.dni),
+				gcnew String(ex.nombresCompletos),
+				ex.genero == 0 ? "Femenino" : ex.genero == 1 ? "Masculino" : "Otros",
+				ex.sueldo,
+				DateTime(ex.fn.año, ex.fn.mes, ex.fn.dia).ToString("dd/MM/yyyy"),
+				CalcularEdad(ex.fn)
+			);
+
+			enColar(ta, limite, ex, Ca);
+		}
+		while (!estaVacia(ta))
+		{
+			Trabajador ex = desenColar(ta, Ca);
+			enColar(tope, limite, ex, Cola);
+		}
+	}
 	private: System::Void btnEncolar_Click(System::Object^  sender, System::EventArgs^  e) {
+		Trabajador trabajador;
+		strcpy(trabajador.dni, StringToChar(txtDNI));
+		strcpy(trabajador.nombresCompletos, StringToChar(txtNombre));
+		trabajador.sueldo = Convert::ToDouble(txtSueldo->Text);
+		trabajador.genero = cmbSexo->SelectedIndex;
+		trabajador.fn.dia = dtFechaNacimiento->Value.Day;
+		trabajador.fn.mes = dtFechaNacimiento->Value.Month;
+		trabajador.fn.año = dtFechaNacimiento->Value.Year;
+
+		enColar(tope, limite, trabajador, Cola);
+		imprimir();
 	}
 	private: System::Void btnDesencolar_Click(System::Object^  sender, System::EventArgs^  e) {
+		desenColar(tope, Cola);
+		imprimir();
 	}
 	private: System::Void Eliminar_Click(System::Object^  sender, System::EventArgs^  e) {
+		if (indiceSeleccionado != -1) {
+			eliminarColaEnIndice(tope,limite, indiceSeleccionado, Cola);
+			indiceSeleccionado = -1;
+			imprimir();
+		}
+	}
+			 int indiceSeleccionado = -1;
+	private: System::Void dgvLista_CellClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
+
+		indiceSeleccionado = dgvLista->SelectedCells[0]->RowIndex;
+
+
+
 	}
 	};
 }
