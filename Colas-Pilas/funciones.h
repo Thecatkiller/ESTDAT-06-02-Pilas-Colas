@@ -31,8 +31,8 @@ void apilar(int &tope, int limite, Trabajador dato, Trabajador Cola[]) {
 		tope++;
 	}
 }
-Trabajador desapilar(int &tope, Trabajador Cola[]) {
-	Trabajador Ex = Cola[tope - 1];
+Trabajador desapilar(int &tope, Trabajador Pila[]) {
+	Trabajador Ex = Pila[tope - 1];
 	if (!estaVacia(tope))tope--;
 	return Ex;
 }

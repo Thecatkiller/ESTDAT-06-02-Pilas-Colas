@@ -9,9 +9,7 @@ namespace ColasPilas {
 	using namespace System::Data;
 	using namespace System::Drawing;
 	using namespace System::Runtime::InteropServices;
-	Trabajador Cola[1500];
-	int tope = 0;
-	int limite = 5;
+
 	/// <summary>
 	/// Resumen de frmColas
 	/// </summary>
@@ -344,17 +342,19 @@ namespace ColasPilas {
 
 		if (buscarCola(tope, limite, Cola, Dni) == false)
 		{
-			Trabajador trabajador;
-			strcpy(trabajador.dni, StringToChar(txtDNI));
-			strcpy(trabajador.nombresCompletos, StringToChar(txtNombre));
-			trabajador.sueldo = Convert::ToDouble(txtSueldo->Text);
-			trabajador.genero = cmbSexo->SelectedIndex;
-			trabajador.fn.dia = dtFechaNacimiento->Value.Day;
-			trabajador.fn.mes = dtFechaNacimiento->Value.Month;
-			trabajador.fn.año = dtFechaNacimiento->Value.Year;
+			if (ValidarCampos() == true) {
+				Trabajador trabajador;
+				strcpy(trabajador.dni, StringToChar(txtDNI));
+				strcpy(trabajador.nombresCompletos, StringToChar(txtNombre));
+				trabajador.sueldo = Convert::ToDouble(txtSueldo->Text);
+				trabajador.genero = cmbSexo->SelectedIndex;
+				trabajador.fn.dia = dtFechaNacimiento->Value.Day;
+				trabajador.fn.mes = dtFechaNacimiento->Value.Month;
+				trabajador.fn.año = dtFechaNacimiento->Value.Year;
 
-			enColar(tope, limite, trabajador, Cola);
-			imprimir();
+				enColar(tope, limite, trabajador, Cola);
+				imprimir();
+			}
 		}
 		else {
 			MessageBox::Show("Ya existe un elemento en la cola con ese DNI");
@@ -375,11 +375,28 @@ namespace ColasPilas {
 			imprimir();
 		}
 	}
+	private: bool ValidarCampos() {
+		bool isValid = true;
+		txtDNI->Text = "";
+		txtNombre->Text = "";
+		txtSueldo->Text = "";
+
+		if (txtDNI->Text->Trim() == "" || txtNombre->Text->Trim() == "" || txtSueldo->Text->Trim() == "" ||
+			cmbSexo->SelectedIndex == -1) {
+
+			MessageBox::Show("Complete los campos");
+
+			isValid = false;
+		}
+		return isValid;
+	}
+
 	private: void LimpiarCampos() {
 		txtDNI->Text = "";
 		txtNombre->Text = "";
 		txtSueldo->Text = "";
-		dtFechaNacimiento->Value = DateTime::Now;
+		DateTime fechaHoy = DateTime::Now;
+		dtFechaNacimiento->Value = DateTime(fechaHoy.Year, fechaHoy.Month, fechaHoy.Day, 0, 0, 0);
 	}
 
 	private: int indiceSeleccionado = -1;
