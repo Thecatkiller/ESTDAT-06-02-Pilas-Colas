@@ -9,7 +9,7 @@ namespace ColasPilas {
 	using namespace System::Data;
 	using namespace System::Drawing;
 	using namespace System::Runtime::InteropServices;
-	Trabajador Cola[50];
+	Trabajador Cola[1500];
 	int tope = 0;
 	int limite = 5;
 	/// <summary>
@@ -121,6 +121,8 @@ namespace ColasPilas {
 			this->txtDNI->Name = L"txtDNI";
 			this->txtDNI->Size = System::Drawing::Size(100, 20);
 			this->txtDNI->TabIndex = 1;
+			this->txtDNI->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &frmColas::txtPermitirSoloNumeros);
+			this->txtDNI->MaxLength = 8;
 			// 
 			// txtNombre
 			// 
@@ -144,6 +146,7 @@ namespace ColasPilas {
 			this->txtSueldo->Name = L"txtSueldo";
 			this->txtSueldo->Size = System::Drawing::Size(118, 20);
 			this->txtSueldo->TabIndex = 5;
+			this->txtSueldo->KeyPress += gcnew System::Windows::Forms::KeyPressEventHandler(this, &frmColas::txtPermitirSoloNumerosyDecimales);
 			// 
 			// label3
 			// 
@@ -180,6 +183,7 @@ namespace ColasPilas {
 			this->dtFechaNacimiento->Name = L"dtFechaNacimiento";
 			this->dtFechaNacimiento->Size = System::Drawing::Size(118, 20);
 			this->dtFechaNacimiento->TabIndex = 8;
+
 			// 
 			// label5
 			// 
@@ -194,6 +198,8 @@ namespace ColasPilas {
 			// 
 			this->dgvLista->AllowUserToAddRows = false;
 			this->dgvLista->AllowUserToDeleteRows = false;
+			this->dgvLista->Anchor = static_cast<System::Windows::Forms::AnchorStyles>(((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left)
+				| System::Windows::Forms::AnchorStyles::Right));
 			this->dgvLista->ColumnHeadersHeightSizeMode = System::Windows::Forms::DataGridViewColumnHeadersHeightSizeMode::AutoSize;
 			this->dgvLista->Columns->AddRange(gcnew cli::array< System::Windows::Forms::DataGridViewColumn^  >(6) {
 				this->colDNI, this->colNombre,
@@ -202,7 +208,7 @@ namespace ColasPilas {
 			this->dgvLista->Location = System::Drawing::Point(15, 171);
 			this->dgvLista->Name = L"dgvLista";
 			this->dgvLista->ReadOnly = true;
-			this->dgvLista->Size = System::Drawing::Size(633, 246);
+			this->dgvLista->Size = System::Drawing::Size(633, 395);
 			this->dgvLista->TabIndex = 10;
 			this->dgvLista->CellClick += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &frmColas::dgvLista_CellClick);
 			// 
@@ -276,7 +282,7 @@ namespace ColasPilas {
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(660, 429);
+			this->ClientSize = System::Drawing::Size(660, 578);
 			this->Controls->Add(this->btnEncolar);
 			this->Controls->Add(this->btnDesencolar);
 			this->Controls->Add(this->Eliminar);
@@ -293,6 +299,7 @@ namespace ColasPilas {
 			this->Controls->Add(this->label1);
 			this->Name = L"frmColas";
 			this->Text = L"frmColas";
+			this->Load += gcnew System::EventHandler(this, &frmColas::frmColas_Load);
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->dgvLista))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
@@ -332,36 +339,73 @@ namespace ColasPilas {
 		}
 	}
 	private: System::Void btnEncolar_Click(System::Object^  sender, System::EventArgs^  e) {
-		Trabajador trabajador;
-		strcpy(trabajador.dni, StringToChar(txtDNI));
-		strcpy(trabajador.nombresCompletos, StringToChar(txtNombre));
-		trabajador.sueldo = Convert::ToDouble(txtSueldo->Text);
-		trabajador.genero = cmbSexo->SelectedIndex;
-		trabajador.fn.dia = dtFechaNacimiento->Value.Day;
-		trabajador.fn.mes = dtFechaNacimiento->Value.Month;
-		trabajador.fn.año = dtFechaNacimiento->Value.Year;
 
-		enColar(tope, limite, trabajador, Cola);
-		imprimir();
+		char* Dni = StringToChar(txtDNI);
+
+		if (buscarCola(tope, limite, Cola, Dni) == false)
+		{
+			Trabajador trabajador;
+			strcpy(trabajador.dni, StringToChar(txtDNI));
+			strcpy(trabajador.nombresCompletos, StringToChar(txtNombre));
+			trabajador.sueldo = Convert::ToDouble(txtSueldo->Text);
+			trabajador.genero = cmbSexo->SelectedIndex;
+			trabajador.fn.dia = dtFechaNacimiento->Value.Day;
+			trabajador.fn.mes = dtFechaNacimiento->Value.Month;
+			trabajador.fn.año = dtFechaNacimiento->Value.Year;
+
+			enColar(tope, limite, trabajador, Cola);
+			imprimir();
+		}
+		else {
+			MessageBox::Show("Ya existe un elemento en la cola con ese DNI");
+		}
 	}
 	private: System::Void btnDesencolar_Click(System::Object^  sender, System::EventArgs^  e) {
 		desenColar(tope, Cola);
 		imprimir();
 	}
 	private: System::Void Eliminar_Click(System::Object^  sender, System::EventArgs^  e) {
-		if (indiceSeleccionado != -1) {
-			eliminarColaEnIndice(tope,limite, indiceSeleccionado, Cola);
-			indiceSeleccionado = -1;
+		char* dni = StringToChar(txtDNI);
+		int topeAux = tope;
+		eliminarCola(tope, limite, Cola, dni);
+
+		if (topeAux != tope)
+		{
+			LimpiarCampos();
 			imprimir();
 		}
 	}
-			 int indiceSeleccionado = -1;
+	private: void LimpiarCampos() {
+		txtDNI->Text = "";
+		txtNombre->Text = "";
+		txtSueldo->Text = "";
+		dtFechaNacimiento->Value = DateTime::Now;
+	}
+
+	private: int indiceSeleccionado = -1;
 	private: System::Void dgvLista_CellClick(System::Object^  sender, System::Windows::Forms::DataGridViewCellEventArgs^  e) {
-
 		indiceSeleccionado = dgvLista->SelectedCells[0]->RowIndex;
+		String^ Dni = Convert::ToString(dgvLista->Rows[indiceSeleccionado]->Cells[0]->Value);
+		txtDNI->Text = Dni;
+	}
+	private: System::Void frmColas_Load(System::Object^  sender, System::EventArgs^  e) {
+		this->dtFechaNacimiento->MaxDate = DateTime::Now;
+		imprimir();
+	}
 
-
-
+	private: System::Void txtPermitirSoloNumerosyDecimales(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
+		System::Windows::Forms::TextBox^ txtBox = (System::Windows::Forms::TextBox^)sender;
+		int a = (txtBox->Text)->IndexOf(".");
+		if ((e->KeyChar >= 48 && e->KeyChar <= 57) || e->KeyChar == 8 || e->KeyChar == 46) {
+			if (a != -1 && e->KeyChar == 46) e->Handled = (true);
+			else e->Handled = (false);
+		}
+		else e->Handled = (true);
+	}
+	private: System::Void txtPermitirSoloNumeros(System::Object^  sender, System::Windows::Forms::KeyPressEventArgs^  e) {
+		if ((e->KeyChar >= 48 && e->KeyChar <= 57) || e->KeyChar == 8)
+			e->Handled = (false);
+		else e->Handled = (true);
 	}
 	};
 }
